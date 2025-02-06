@@ -300,12 +300,12 @@
 	<!-- Draw smooth circular ring segments -->
 	{#each rings as ring, rIndex}
 		{#each Array(ring.segments).fill(0) as _, i}
-			
+			{#key `${rIndex}-${i}`}
 				<path
-					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex])}
+					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex]*0.3)}
 					class="duration-500 fill-accent-light stroke-accent"
 				/>
-			
+			{/key}
 		{/each}
 	{/each}
 
