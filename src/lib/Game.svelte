@@ -304,7 +304,7 @@
 				<path
 					d={getSegmentPath(ring, i, ring.segments, 0)}
 					class="duration-500 fill-accent-light stroke-accent"
-					style="transform-origin: center; transform: rotate({rotation[rIndex]*0.3}rad);"
+					style="transform-origin: center; transform: rotate({rotation[rIndex]}rad);"
 				/>
 			{/key}
 		{/each}
