@@ -302,8 +302,9 @@
 		{#each Array(ring.segments).fill(0) as _, i}
 			{#key `${rIndex}-${i}`}
 				<path
-					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex])}
+					d={getSegmentPath(ring, i, ring.segments, 0)}
 					class="duration-500 fill-accent-light stroke-accent"
+					style="transform-origin: center; transform: rotate({rotation[rIndex]*0.3}rad);"
 				/>
 			{/key}
 		{/each}
