@@ -296,16 +296,14 @@
 	}
 </script>
 
-<svg width="360" height="360" style="filter: drop-shadow(0rem 0rem 0.4rem #292F4240)">
+<svg width="360" height="360" class="shadow">
 	<!-- Draw smooth circular ring segments -->
 	{#each rings as ring, rIndex}
 		{#each Array(ring.segments).fill(0) as _, i}
 			{#key `${rIndex}-${i}`}
 				<path
 					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex])}
-					fill="#C6D2FA"
-					stroke="#9FADDB"
-					class="duration-500"
+					class="duration-500 fill-accent-light stroke-accent"
 				/>
 			{/key}
 		{/each}
@@ -316,8 +314,7 @@
 		cx={centerX}
 		cy={centerY}
 		r={180 * 0.8 * 0.72 * 0.64 * 0.5}
-		fill="#C6D2FA"
-		stroke="#9FADDB"
+		class="fill-accent-light stroke-accent"
 	/>
 
 	<!-- Draw game pieces -->
