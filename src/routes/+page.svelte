@@ -4,13 +4,13 @@
 	import { Swords, Bot, BookText, GraduationCap } from 'lucide-svelte';
 </script>
 
-<div class="w-full h-full flex flex-row">
+<div class="w-full h-full flex flex-row mb-16">
 	<div class="h-full w-full flex flex-col px-8 py-12 gap-12">
 		<div class="flex flex-col gap-1">
 			<h1 class="text-3xl font-semibold">voidshift</h1>
 			<h2 class="text-xl text-secondary-text">connect four but with quite a literal twist</h2>
 		</div>
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 			<button
 				class="outline-none shadow bg-accent-strong flex flex-row items-center justify-center gap-4 h-16 rounded-lg font-semibold text-xl"
 				><Swords />

@@ -5,7 +5,9 @@
 	let { children } = $props();
 </script>
 
-<div class="bg-surface w-screen h-screen absolute top-0 left-0 p-8 flex flex-col gap-8">
-	<Navbar />
+<div
+	class="bg-surface w-screen h-screen fixed top-0 left-0 p-8 flex flex-col gap-8 overflow-y-scroll pt-32"
+>
 	{@render children()}
+	<Navbar />
 </div>
