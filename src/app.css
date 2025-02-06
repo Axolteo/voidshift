@@ -12,6 +12,10 @@
 	--color-accent-light: #b1bde1;
 }
 
+html {
+	background-color: var(--color-surface);
+}
+
 :root {
 	box-sizing: border-box;
 	color: var(--color-text);
