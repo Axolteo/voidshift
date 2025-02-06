@@ -18,7 +18,8 @@
 }
 
 .shadow {
-	filter: drop-shadow(0px 0px 32px rgba(134, 149, 197, 0.25));
+	-webkit-filter: drop-shadow(0px 0px 2rem rgba(134, 149, 197, 0.25));
+	filter: drop-shadow(0px 0px 2rem rgba(134, 149, 197, 0.25));
 	backdrop-filter: blur(0);
 }
 
