@@ -302,8 +302,8 @@
 		{#each Array(ring.segments).fill(0) as _, i}
 			{#key `${rIndex}-${i}`}
 				<path
-					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex]*0.3)}
-					class="duration-500 fill-accent-light {rotationTriggered? '': 'stroke-accent'}"
+					d={getSegmentPath(ring, i, ring.segments, rotation[rIndex])}
+					class="duration-500 fill-accent-light stroke-accent"
 				/>
 			{/key}
 		{/each}
