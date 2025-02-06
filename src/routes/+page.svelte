@@ -10,7 +10,7 @@
 			<h1 class="text-3xl font-semibold">voidshift</h1>
 			<h2 class="text-xl text-secondary-text">connect four but with quite a literal twist</h2>
 		</div>
-		<div class="grid grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 			<button
 				class="outline-none shadow bg-accent-strong flex flex-row items-center justify-center gap-4 h-16 rounded-lg font-semibold text-xl"
 				><Swords />
