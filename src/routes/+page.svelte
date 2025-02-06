@@ -33,7 +33,7 @@
 			>
 		</div>
 	</div>
-	<div class="h-full w-full flex flex-col items-center justify-center hidden sm:inline">
+	<div class="h-full w-full flex-col items-center justify-center hidden sm:flex">
 		<Game />
 	</div>
 </div>
