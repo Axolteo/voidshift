@@ -22,8 +22,8 @@ html {
 }
 
 .shadow {
-	-webkit-filter: drop-shadow(0px 0px 4rem rgba(134, 149, 197, 0.25));
-	filter: drop-shadow(0px 0px 2rem rgba(134, 149, 197, 0.25));
+	-webkit-filter: drop-shadow(rgba(134, 149, 197, 0.25) 0px 0px 2rem);
+	filter: drop-shadow(rgba(134, 149, 197, 0.25) 0px 0px 2rem);
 }
 
 .navfade {
