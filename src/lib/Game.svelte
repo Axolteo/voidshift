@@ -2,6 +2,7 @@
 	// @ts-nocheck
 
 	import { onMount } from 'svelte';
+	let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 	const centerX = 180,
 		centerY = 180;
@@ -41,6 +42,10 @@
 		white: {
 			fill: '#FFFFFF',
 			stroke: '#e7e7e7'
+		},
+		won: {
+			fill: '#7A91DD',
+			stroke: '#5A6CA7'
 		}
 	};
 	let isSelected = false;
@@ -128,7 +133,7 @@
 			rotationTriggered = false;
 		}
 	}
-	function pieceClick(piece) {
+	export function pieceClick(piece) {
 		if (gameState == 'end') {
 			return;
 		}
@@ -178,7 +183,7 @@
 		}
 	}
 
-	function pieceMove(piece, move) {
+	export function pieceMove(piece, move) {
 		let pieceRef = getPieceIndex(piece);
 		pieces[pieceRef] = move;
 		movePositions = [];
@@ -199,8 +204,14 @@
 		} else {
 			turn.side = 'white';
 		}
-		if (checkWin(pieces[pieceRef])) {
+		let won = checkWin(pieces[pieceRef]);
+		if (won) {
 			console.log(piece.side + ' won!');
+			console.log(won);
+			won.forEach((winPiece) => {
+				pieces[getPieceIndex(winPiece)].side = 'won';
+				console.log(pieces[getPieceIndex(winPiece)]);
+			});
 			gameState = 'end';
 		}
 	}
@@ -209,41 +220,43 @@
 		if (piece.ring == 3) {
 			return false;
 		}
+
+		let surroundingPieces = [
+			getPiece(piece.ring, piece.segment - 3),
+			getPiece(piece.ring, piece.segment - 2),
+			getPiece(piece.ring, piece.segment - 1),
+			getPiece(piece.ring, piece.segment + 1),
+			getPiece(piece.ring, piece.segment + 2),
+			getPiece(piece.ring, piece.segment + 3)
+		];
+
 		if (
-			getPiece(piece.ring, piece.segment - 2)?.side ==
-				getPiece(piece.ring, piece.segment - 1)?.side &&
-			getPiece(piece.ring, piece.segment - 1)?.side ==
-				getPiece(piece.ring, piece.segment + 1)?.side &&
-			getPiece(piece.ring, piece.segment + 1)?.side == piece.side
+			surroundingPieces[1]?.side == surroundingPieces[2]?.side &&
+			surroundingPieces[2]?.side == surroundingPieces[3]?.side &&
+			surroundingPieces[3]?.side == piece.side
 		) {
-			return true;
+			return [surroundingPieces[1], surroundingPieces[2], surroundingPieces[3], piece];
 		}
 		if (
-			getPiece(piece.ring, piece.segment - 1)?.side ==
-				getPiece(piece.ring, piece.segment + 1)?.side &&
-			getPiece(piece.ring, piece.segment + 1)?.side ==
-				getPiece(piece.ring, piece.segment + 2)?.side &&
-			getPiece(piece.ring, piece.segment + 2)?.side == piece.side
+			surroundingPieces[2]?.side == surroundingPieces[3]?.side &&
+			surroundingPieces[3]?.side == surroundingPieces[4]?.side &&
+			surroundingPieces[4]?.side == piece.side
 		) {
-			return true;
+			return [surroundingPieces[2], surroundingPieces[3], surroundingPieces[4], piece];
 		}
 		if (
-			getPiece(piece.ring, piece.segment - 3)?.side ==
-				getPiece(piece.ring, piece.segment - 2)?.side &&
-			getPiece(piece.ring, piece.segment - 2)?.side ==
-				getPiece(piece.ring, piece.segment - 1)?.side &&
-			getPiece(piece.ring, piece.segment - 1)?.side == piece.side
+			surroundingPieces[0]?.side == surroundingPieces[1]?.side &&
+			surroundingPieces[1]?.side == surroundingPieces[2]?.side &&
+			surroundingPieces[2]?.side == piece.side
 		) {
-			return true;
+			return [surroundingPieces[0], surroundingPieces[1], surroundingPieces[2], piece];
 		}
 		if (
-			getPiece(piece.ring, piece.segment + 1)?.side ==
-				getPiece(piece.ring, piece.segment + 2)?.side &&
-			getPiece(piece.ring, piece.segment + 2)?.side ==
-				getPiece(piece.ring, piece.segment + 3)?.side &&
-			getPiece(piece.ring, piece.segment + 3)?.side == piece.side
+			surroundingPieces[3]?.side == surroundingPieces[4]?.side &&
+			surroundingPieces[4]?.side == surroundingPieces[5]?.side &&
+			surroundingPieces[5]?.side == piece.side
 		) {
-			return true;
+			return [surroundingPieces[3], surroundingPieces[4], surroundingPieces[5], piece];
 		}
 		return false;
 	}
@@ -294,6 +307,21 @@
 		});
 		return state;
 	}
+
+	export const game = {
+		getState() {
+			return getGameState();
+		},
+		white: {
+			getState() {},
+			getMoves(gameState) {}
+		},
+		black: {
+			getState() {},
+			getMoves(gameState) {}
+		},
+		move(moveId) {}
+	};
 </script>
 
 <svg width="360" height="360" class="shadow">
@@ -302,9 +330,9 @@
 		{#each Array(ring.segments).fill(0) as _, i}
 			{#key `${rIndex}-${i}`}
 				<path
-					d={getSegmentPath(ring, i, ring.segments, 0)}
+					d={getSegmentPath(ring, i, ring.segments, isSafari ? 0 : rotation[rIndex])}
 					class="duration-500 fill-accent-light stroke-accent"
-					style="transform-origin: center; transform: rotate({rotation[rIndex]}rad);"
+					style="transform-origin: center; transform: rotate({isSafari ? rotation[rIndex] : 0}rad);"
 				/>
 			{/key}
 		{/each}
