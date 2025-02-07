@@ -17,8 +17,8 @@
 	let gameView: Game;
 </script>
 
-<div class="w-full h-full flex flex-row gap-16">
-	<div class="relative h-full w-full flex-col items-center justify-center hidden sm:flex pt-16">
+<div class="w-full h-full flex flex-col overflow-y-scroll lg:flex-row gap-16">
+	<div class="relative h-full w-full flex-col items-center justify-center hidden sm:flex pt-20">
 		<div class="absolute w-full flex flex-row justify-between top-0 left-0">
 			<PlayerTimer><img src="anonymous.svg" alt="pfp" /></PlayerTimer>
 			<PlayerTimer><img src="anonymous.svg" alt="pfp" /></PlayerTimer>
@@ -26,7 +26,7 @@
 		<Game bind:this={gameView} />
 	</div>
 	<div
-		class="relative h-full w-5/11 flex flex-col justify-between px-8 py-12 gap-12 items-center bg-secondary-surface rounded-lg overflow-y-scroll"
+		class="relative h-full w-full lg:w-5/11 flex flex-col justify-between px-8 py-12 gap-12 items-center bg-secondary-surface rounded-lg overflow-y-scroll"
 	>
 		<div class="flex flex-col gap-6 w-full">
 			<h1 class="text-3xl font-semibold">play</h1>
