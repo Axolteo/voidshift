@@ -3,6 +3,8 @@
 @theme {
 	--color-surface: #121019;
 	--color-secondary-surface: #1f1b2b;
+	--color-transparent-surface: #12101980;
+	--color-ternary-surface: #302945;
 
 	--color-text: #ffffff;
 	--color-secondary-text: #c4c4c4;

@@ -7,7 +7,7 @@
 	import GraduationCap from 'lucide-svelte/icons/graduation-cap';
 </script>
 
-<div class="w-full h-full flex flex-row gap-6">
+<div class="w-full h-full flex flex-row gap-16">
 	<div class="h-full w-full flex flex-col py-4 gap-12">
 		<div class="flex flex-col gap-1">
 			<h1 class="text-3xl font-semibold">404 - page not found</h1>

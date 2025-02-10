@@ -2,6 +2,13 @@
 	// @ts-nocheck
 
 	import { onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
+	onMount(() => {
+		dispatch('gameMounted');
+	});
 	let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 	const centerX = 180,
@@ -49,12 +56,14 @@
 		}
 	};
 	let isSelected = false;
+	let lastMove = {};
 	let selectedPiece;
 	let moves = 0;
 	export let moveLog = [];
 	let turn = {
 		side: 'white'
 	};
+	let playerSide;
 	let gameState = 'play';
 	let movePositions;
 
@@ -133,11 +142,11 @@
 			rotationTriggered = false;
 		}
 	}
-	export function pieceClick(piece) {
+	export function pieceClick(piece, fromCloud) {
 		if (gameState == 'end') {
 			return;
 		}
-		if (piece.side != turn.side) {
+		if (piece.side != turn.side || (turn.side != playerSide && !fromCloud)) {
 			return;
 		}
 		isSelected = true;
@@ -187,7 +196,7 @@
 		let pieceRef = getPieceIndex(piece);
 		pieces[pieceRef] = move;
 		movePositions = [];
-		moveLog.push({
+		lastMove = {
 			from: {
 				ring: piece.ring,
 				segment: segmentFix(piece.segment, piece.ring)
@@ -196,7 +205,8 @@
 				ring: move.ring,
 				segment: segmentFix(move.segment, move.ring)
 			}
-		});
+		};
+		moveLog.push(lastMove);
 		moveLog = moveLog;
 		moves++;
 		if (turn.side == 'white') {
@@ -214,6 +224,7 @@
 			});
 			gameState = 'end';
 		}
+		dispatch('moveMade');
 	}
 
 	function checkWin(piece) {
@@ -288,39 +299,182 @@
 	}
 
 	export function getGameState() {
-		let state = [moves % 6];
+		let state = { moves: moves, rotations: Math.floor(moves / 6) };
 		rings.forEach((ring, rIndex) => {
+			let ringRef = [];
 			for (let i = 0; i < ring.segments; i++) {
 				let piece = getPiece(rIndex, i);
 				switch (piece?.side) {
 					case 'black':
-						state.push(-1);
+						ringRef.push(-1);
 						break;
 					case 'white':
-						state.push(1);
+						ringRef.push(1);
 						break;
 					default:
-						state.push(0);
+						ringRef.push(0);
 						break;
 				}
 			}
+			state[rIndex] = ringRef;
 		});
 		return state;
 	}
+	let whiteTime = 60000;
+	let blackTime = 60000;
+	let whiteDeadline = Date.now() + whiteTime;
+	let blackDeadline = Date.now() + blackTime;
+
+	setInterval(() => {
+		let now = Date.now();
+		if (turn.side == 'white') {
+			whiteTime = whiteDeadline - Date.now();
+		} else {
+			blackTime = blackDeadline - Date.now();
+		}
+		dispatch('timerUpdate');
+	}, 100);
 
 	export const game = {
+		setPlayerSide(side) {
+			playerSide = side;
+		},
+		getPlayerSide() {
+			return playerSide;
+		},
 		getState() {
 			return getGameState();
 		},
+		setState(state) {
+			if (state == null) {
+				return;
+			}
+			pieces = [];
+			for (let ringI = 0; ringI < 4; ringI++) {
+				for (let i = 0; i < state[ringI].length; i++) {
+					let side;
+					if (state[ringI][i] == 1) {
+						side = 'white';
+					} else {
+						if (state[ringI][i] == -1) {
+							side = 'black';
+						} else {
+							side = null;
+						}
+					}
+					if (side != null) {
+						pieces.push({
+							ring: ringI,
+							segment: i,
+							side: side
+						});
+					}
+				}
+			}
+
+			rotationTriggered = true;
+			moves = state.moves;
+
+			setTimeout(() => {
+				rotationTriggered = false;
+			}, 500);
+
+			for (let i = 0; i < state.rotations; i++) {
+				rotation = [
+					rotation[0], // Outer ring stays still
+					rotation[1] + Math.PI / 6, // Middle ring rotates
+					rotation[2] - Math.PI / 3 // Inner ring rotates
+				];
+			}
+			if (moves % 6 == 0) {
+				rotation = [
+					rotation[0], // Outer ring stays still
+					rotation[1] - Math.PI / 6, // Middle ring rotates
+					rotation[2] + Math.PI / 3 // Inner ring rotates
+				];
+			}
+			if (moves % 2 == 0) {
+				turn.side = 'white';
+			} else {
+				turn.side = 'black';
+			}
+			console.log(pieces, moves, turn, state.rotations);
+		},
 		white: {
 			getState() {},
-			getMoves(gameState) {}
+			getMoves(gameState) {},
+			getTime() {
+				return whiteTime;
+			},
+			getDeadline() {
+				return whiteDeadline;
+			},
+			setDeadline(deadline) {
+				whiteDeadline = deadline;
+			},
+			setTime(time) {
+				whiteTime = time;
+			}
 		},
 		black: {
 			getState() {},
-			getMoves(gameState) {}
+			getMoves(gameState) {},
+			getTime() {
+				return blackTime;
+			},
+			getDeadline() {
+				return blackDeadline;
+			},
+			setDeadline(deadline) {
+				blackDeadline = deadline;
+			},
+			setTime(time) {
+				blackTime = time;
+			}
 		},
-		move(moveId) {}
+		move: {
+			run(moveId) {
+				let target = getPiece(moveId.from.ring, moveId.from.segment);
+				console.log('moving piece', target);
+
+				if (target == null) {
+					console.error('Unknown piece at ' + moveId.from.ring + ', ' + moveId.from.segment);
+				} else {
+					pieceClick(target, true);
+					console.log(target, movePositions, turn.side, playerSide);
+					if (
+						!movePositions?.some(
+							(obj) =>
+								obj.ring === moveId.to.ring &&
+								obj.segment === segmentFix(moveId.to.segment, moveId.to.ring)
+						)
+					) {
+						console.error('bad move; not in move positions');
+					} else {
+						pieceMove(selectedPiece, {
+							ring: moveId.to.ring,
+							segment: segmentFix(moveId.to.segment, moveId.to.ring),
+							side: selectedPiece.side
+						});
+					}
+				}
+			},
+			new(fromRing, fromSegment, toRing, toSegment) {
+				return {
+					from: { ring: fromRing, segment: fromSegment },
+					to: { ring: toRing, segment: toSegment }
+				};
+			},
+			last() {
+				return lastMove;
+			},
+			getAll() {
+				return moveLog;
+			},
+			count() {
+				return moves;
+			}
+		}
 	};
 </script>
 

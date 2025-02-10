@@ -5,9 +5,10 @@
 	import Bot from 'lucide-svelte/icons/bot';
 	import BookText from 'lucide-svelte/icons/book-text';
 	import GraduationCap from 'lucide-svelte/icons/graduation-cap';
+	
 </script>
 
-<div class="w-full h-full flex flex-row gap-6">
+<div class="w-full h-full flex flex-row gap-16">
 	<div class="h-full w-full flex flex-col py-4 gap-12">
 		<div class="flex flex-col gap-1">
 			<h1 class="text-3xl font-semibold">voidshift</h1>
@@ -21,21 +22,21 @@
 					<p>create a game</p></button
 				></a
 			>
-			<a href="/play"
+			<a href="/tutorial"
 				><button
 					class="hover:cursor-pointer w-full outline-none shadow bg-accent-strong flex flex-row items-center justify-center gap-4 h-16 rounded-lg text-xl"
 					><BookText />
 					<p>learn to play</p></button
 				></a
 			>
-			<a href="/play"
+			<a href="/bot"
 				><button
 					class="hover:cursor-pointer w-full outline-none shadow bg-accent-strong flex flex-row items-center justify-center gap-4 h-16 rounded-lg text-xl"
 					><Bot />
 					<p>play vs a bot</p></button
 				></a
 			>
-			<a href="/play"
+			<a href="/analysis"
 				><button
 					class="hover:cursor-pointer w-full outline-none shadow bg-accent-strong flex flex-row items-center justify-center gap-4 h-16 rounded-lg text-xl"
 					><GraduationCap />
