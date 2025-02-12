@@ -31,6 +31,10 @@
 	let window: Window;
 	const urlParams = page.url.searchParams;
 	userId = urlParams.get('username')!;
+	if (userId == null) {
+		userId = Math.floor(Math.random() * 9999) + '';
+
+	}
 	let gameId = urlParams.get('game');
 
 	function createGame() {
