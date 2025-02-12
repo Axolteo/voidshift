@@ -86,9 +86,9 @@
 			players: {
 				white: white,
 				black: black,
-				lastMove: {
-					user: userId
-				}
+			}
+			lastMove: {
+				user: userId
 			}
 		});
 		screen = 'send';
