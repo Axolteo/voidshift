@@ -232,6 +232,8 @@
 				isOnline={gameInProgress}
 			/>
 		{/key}
+		<div>
+		</div>
 	</div>
 	{#if screen == 'create'}
 		<div
