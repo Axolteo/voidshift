@@ -245,7 +245,7 @@
 					>play!</button
 				>
 				<div class="flex flex-col gap-3 w-full">
-					<h1 class="text-2xl font-semibold text-secondary-text">side</h1>
+					<h1 class="text-xl font-semibold text-secondary-text">side</h1>
 					<div class="flex flex-row gap-6 w-full">
 						<button
 							on:click={() => {
@@ -281,7 +281,7 @@
 				</div>
 
 				<div class="flex flex-col gap-3 w-full">
-					<h1 class="text-2xl font-semibold text-secondary-text">time</h1>
+					<h1 class="text-xl font-semibold text-secondary-text">time</h1>
 					<div class="flex flex-row gap-6 w-full">
 						<button
 							on:click={() => {
@@ -337,7 +337,7 @@
 				<h1 class="text-2xl font-semibold text-text w-full">invite others</h1>
 
 				<div class="flex flex-col gap-3 w-full">
-					<h1 class="text-2xl font-semibold text-secondary-text">game link</h1>
+					<h1 class="text-xl font-semibold text-secondary-text">game link</h1>
 					<input
 						spellcheck="false"
 						class="outline-0 bg-surface rounded-lg h-12 w-full p-4"
@@ -350,7 +350,7 @@
 				</div>
 
 				<div class="flex flex-col gap-3 w-full">
-					<h1 class="text-2xl font-semibold text-secondary-text">code</h1>
+					<h1 class="text-xl font-semibold text-secondary-text">code</h1>
 					<input class="outline-0 bg-surface rounded-lg h-12 w-full p-4" value={gameId} />
 				</div>
 			</div>
