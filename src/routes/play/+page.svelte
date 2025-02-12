@@ -135,15 +135,15 @@
 			if (snapshot.exists()) {
 				const data = snapshot.val().lastMove?.move;
 				console.log(snapshot.val().lastMove?.user + '\n' + userId);
-				if (snapshot.val().lastMove.user != userId) {
+				if (snapshot.val().lastMove != null && snapshot.val().lastMove?.user != userId) {
 					interceptedMove = true;
 					console.log(snapshot.val());
 					game.move.run(data);
-					game.black.setDeadline(snapshot.val().players.black.time);
+				}
+				game.black.setDeadline(snapshot.val().players.black.time);
 					game.white.setDeadline(snapshot.val().players.white.time);
 					console.log(game.black.getDeadline(), game.white.getDeadline());
 					timerUpdate();
-				}
 			}
 		});
 	}
