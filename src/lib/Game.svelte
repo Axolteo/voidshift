@@ -328,7 +328,7 @@
 	let blackTime = 60000;
 	let whiteDeadline = Date.now() + whiteTime;
 	let blackDeadline = Date.now() + blackTime;
-	$: if (isOnline) {
+	if (isOnline) {
 		setInterval(() => {
 			let now = Date.now();
 			if (turn.side == 'white') {

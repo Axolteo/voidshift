@@ -85,7 +85,10 @@
 		set(gameRef, {
 			players: {
 				white: white,
-				black: black
+				black: black,
+				lastMove: {
+					user: userId
+				}
 			}
 		});
 		screen = 'send';
