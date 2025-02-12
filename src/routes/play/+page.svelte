@@ -86,9 +86,6 @@
 			players: {
 				white: white,
 				black: black,
-			},
-			lastMove: {
-				user: userId
 			}
 		});
 		screen = 'send';
@@ -200,6 +197,7 @@
 	let currentTurn: any;
 
 	let gameInProgress = gameId != null;
+	$: gameInProgress = gameId != null;
 	console.log(gameId);
 
 	function timerUpdate() {
