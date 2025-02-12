@@ -5,6 +5,7 @@
 	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
+	export let isOnline = false;
 
 	onMount(() => {
 		dispatch('gameMounted');
@@ -146,7 +147,7 @@
 		if (gameState == 'end') {
 			return;
 		}
-		if (piece.side != turn.side || (turn.side != playerSide && !fromCloud)) {
+		if (piece.side != turn.side || isOnline && (turn.side != playerSide && !fromCloud)) {
 			return;
 		}
 		isSelected = true;
@@ -311,6 +312,9 @@
 					case 'white':
 						ringRef.push(1);
 						break;
+					case 'won':
+						ringRef.push(2);
+						break;
 					default:
 						ringRef.push(0);
 						break;
@@ -324,17 +328,17 @@
 	let blackTime = 60000;
 	let whiteDeadline = Date.now() + whiteTime;
 	let blackDeadline = Date.now() + blackTime;
-
-	setInterval(() => {
-		let now = Date.now();
-		if (turn.side == 'white') {
-			whiteTime = whiteDeadline - Date.now();
-		} else {
-			blackTime = blackDeadline - Date.now();
-		}
-		dispatch('timerUpdate');
-	}, 100);
-
+	if (isOnline) {
+		setInterval(() => {
+			let now = Date.now();
+			if (turn.side == 'white') {
+				whiteTime = whiteDeadline - Date.now();
+			} else {
+				blackTime = blackDeadline - Date.now();
+			}
+			dispatch('timerUpdate');
+		}, 100);
+	}
 	export const game = {
 		setPlayerSide(side) {
 			playerSide = side;
@@ -358,6 +362,8 @@
 					} else {
 						if (state[ringI][i] == -1) {
 							side = 'black';
+						} else if (state[ringI][i] == 2) {
+							side = "won";
 						} else {
 							side = null;
 						}

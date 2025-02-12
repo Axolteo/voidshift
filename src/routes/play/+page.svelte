@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import Game from '$lib/Game.svelte';
 	import PlayerTimer from '$lib/play/PlayerTimer.svelte';
 
@@ -8,8 +9,11 @@
 	import { onMount } from 'svelte';
 	console.log($database);
 
+	let domain = page.url.host;
+
 	let screen = 'create';
 	let side = 'mixed';
+	let userId = Math.floor(Math.random() * 9999) + '';
 	let time = 5 * 60000;
 
 	function chooseSide(choose: string) {
@@ -25,8 +29,8 @@
 
 	let gameComponent: Game;
 	let window: Window;
-	const urlParams = $page.url.searchParams;
-	let userId = urlParams.get('username')!;
+	const urlParams = page.url.searchParams;
+	userId = urlParams.get('username')!;
 	let gameId = urlParams.get('game');
 
 	function createGame() {
@@ -36,35 +40,39 @@
 
 		let white = {};
 		let black = {};
-
+		let gameSide = side;
 		if (side == 'mixed') {
 			let rand = Math.floor(Math.random() * 2);
 			if (rand == 0) {
-				side = 'white';
+				gameSide = 'white';
 			} else {
-				side = 'black';
+				gameSide = 'black';
 			}
 		}
-		if (side == 'white') {
+		if (gameSide == 'white') {
 			white = {
 				username: userId,
 				time: time + Date.now(),
+				lastTime: Date.now(),
 				host: true
 			};
 			black = {
 				username: 'waiting...',
 				time: time + Date.now(),
+				lastTime: Date.now(),
 				host: false
 			};
-		} else if (side == 'black') {
+		} else if (gameSide == 'black') {
 			white = {
 				username: 'waiting...',
 				time: time + Date.now(),
+				lastTime: Date.now(),
 				host: false
 			};
 			black = {
 				username: userId,
 				time: time + Date.now(),
+				lastTime: Date.now(),
 				host: true
 			};
 		}
@@ -75,6 +83,12 @@
 				black: black
 			}
 		});
+		screen = 'send';
+		page.url.searchParams.set('username', userId);
+		page.url.searchParams.set('game', gameId + '');
+
+		goto(`?${page.url.searchParams.toString()}`);
+		gameReload++;
 	}
 
 	let interceptedMove = false;
@@ -110,43 +124,65 @@
 			}
 		});
 		onValue(ref($database, 'games/' + gameId), (snapshot) => {
-			if (snapshot.exists() && loadState != null) {
-				const data = snapshot.val().lastMove.move;
-				console.log(snapshot.val().lastMove.user + '\n' + userId);
+			if (snapshot.exists()) {
+				const data = snapshot.val().lastMove?.move;
+				console.log(snapshot.val().lastMove?.user + '\n' + userId);
 				if (snapshot.val().lastMove.user != userId) {
 					interceptedMove = true;
 					console.log(snapshot.val());
 					game.move.run(data);
-					game.white.setDeadline(snapshot.val().players.white.time);
 					game.black.setDeadline(snapshot.val().players.black.time);
-
+					game.white.setDeadline(snapshot.val().players.white.time);
+					console.log(game.black.getDeadline(), game.white.getDeadline());
 					timerUpdate();
 				}
 			}
 		});
 	}
+	let gameReload = 0;
 
 	function moveMade() {
 		console.log(interceptedMove);
 		if (!interceptedMove) {
 			let timer;
+			let offset;
+			let otherSide;
 			if (game.getPlayerSide() == 'white') {
-				timer = Date.now() + game.white.getTime();
+				otherSide = 'black';
 			} else {
-				timer = Date.now() + game.black.getTime();
+				otherSide = 'white';
 			}
-			console.log(timer);
+			get(ref($database, 'games/' + gameId)).then((snapshot) => {
+				if (game.getPlayerSide() == 'white') {
+					timer = Date.now() + game.white.getTime();
+					offset = Date.now() - snapshot.val().players.white.lastTime;
+				} else {
+					timer = Date.now() + game.black.getTime();
+					offset = Date.now() - snapshot.val().players.black.lastTime;
+				}
+				console.log(timer, offset);
 
-			let updates: Record<string, any> = {};
-			updates['gameState'] = game.getState();
-			updates['lastMove'] = {
-				move: game.move.last(),
-				user: userId
-			};
-			updates['moves'] = game.move.getAll();
-			updates['/players/' + game.getPlayerSide() + '/time'] = timer;
-			update(ref($database, 'games/' + gameId), updates);
-			console.log('sent move');
+				let updates: Record<string, any> = {};
+				updates['gameState'] = game.getState();
+				updates['lastMove'] = {
+					move: game.move.last(),
+					user: userId
+				};
+				updates['moves'] = game.move.getAll();
+				updates['/players/' + game.getPlayerSide() + '/time'] = timer;
+				updates['/players/' + otherSide + '/lastTime'] = Date.now();
+				updates['/players/' + otherSide + '/time'] =
+					snapshot.val().players[otherSide].time + offset;
+				if (game.getPlayerSide() == 'white') {
+					game.black.setDeadline(snapshot.val().players[otherSide].time + offset);
+				} else {
+					game.white.setDeadline(snapshot.val().players[otherSide].time + offset);
+				}
+
+				update(ref($database, 'games/' + gameId), updates);
+
+				console.log('sent move');
+			});
 		}
 		interceptedMove = false;
 		console.log('new move intercept ', interceptedMove);
@@ -154,13 +190,19 @@
 	let whiteTime: any;
 	let blackTime: any;
 	let currentTurn: any;
+
+	let gameInProgress = gameId != null;
+	console.log(gameId);
+
 	function timerUpdate() {
-		whiteTime = game.white.getTime();
-		blackTime = game.black.getTime();
-		if (game.move.count() % 2 == 0) {
-			currentTurn = 'white';
-		} else {
-			currentTurn = 'black';
+		if (gameInProgress) {
+			whiteTime = game.white.getTime();
+			blackTime = game.black.getTime();
+			if (game.move.count() % 2 == 0) {
+				currentTurn = 'white';
+			} else {
+				currentTurn = 'black';
+			}
 		}
 	}
 </script>
@@ -175,87 +217,94 @@
 				><img src="anonymous.svg" alt="pfp" /></PlayerTimer
 			>
 		</div>
-		<Game
-			bind:game
-			on:timerUpdate={timerUpdate}
-			bind:this={gameComponent}
-			on:gameMounted={gameMounted}
-			on:moveMade={moveMade}
-		/>
+		{#key gameReload}
+			<Game
+				bind:game
+				on:timerUpdate={timerUpdate}
+				bind:this={gameComponent}
+				on:gameMounted={gameMounted}
+				on:moveMade={moveMade}
+				isOnline={gameInProgress}
+			/>
+		{/key}
 	</div>
 	{#if screen == 'create'}
 		<div
-			class="relative w-full lg:h-full lg:w-5/11 flex flex-col justify-between px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
+			class="relative w-full lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
 		>
-			<div class="flex flex-col gap-3 w-full">
-				<h1 class="text-2xl font-semibold text-secondary-text">side</h1>
-				<div class="flex flex-row gap-6 w-full">
-					<button
-						on:click={() => {
-							chooseSide('white');
-						}}
-						class="bg-surface duration-200 {side == 'white'
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						<img src="pieces/white piece.svg" alt="white" />
-					</button>
-					<button
-						on:click={() => {
-							chooseSide('mixed');
-						}}
-						class="bg-surface duration-200 {side == 'mixed'
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						<img src="pieces/interracial piece.svg" alt="mixed" />
-					</button>
-					<button
-						on:click={() => {
-							chooseSide('black');
-						}}
-						class="bg-surface duration-200 {side == 'black'
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						<img src="pieces/black piece.svg" alt="black" />
-					</button>
-				</div>
-			</div>
+			<div class="flex flex-col gap-8 w-full">
+				<h1 class="text-2xl font-semibold text-text w-full">create game</h1>
 
-			<div class="flex flex-col gap-3 w-full">
-				<h1 class="text-2xl font-semibold text-secondary-text">time</h1>
-				<div class="flex flex-row gap-6 w-full">
-					<button
-						on:click={() => {
-							chooseTime(1 * 60000);
-						}}
-						class="bg-surface duration-200 {time == 1 * 60000
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						1:00
-					</button>
-					<button
-						on:click={() => {
-							chooseTime(5 * 60000);
-						}}
-						class="bg-surface duration-200 {time == 5 * 60000
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						5:00
-					</button>
-					<button
-						on:click={() => {
-							chooseTime(10 * 60000);
-						}}
-						class="bg-surface duration-200 {time == 10 * 60000
-							? 'selected'
-							: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
-					>
-						10:00
-					</button>
+				<div class="flex flex-col gap-3 w-full">
+					<h1 class="text-2xl font-semibold text-secondary-text">side</h1>
+					<div class="flex flex-row gap-6 w-full">
+						<button
+							on:click={() => {
+								chooseSide('white');
+							}}
+							class="bg-surface duration-200 {side == 'white'
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							<img src="pieces/white piece.svg" alt="white" />
+						</button>
+						<button
+							on:click={() => {
+								chooseSide('mixed');
+							}}
+							class="bg-surface duration-200 {side == 'mixed'
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							<img src="pieces/interracial piece.svg" alt="mixed" />
+						</button>
+						<button
+							on:click={() => {
+								chooseSide('black');
+							}}
+							class="bg-surface duration-200 {side == 'black'
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							<img src="pieces/black piece.svg" alt="black" />
+						</button>
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-3 w-full">
+					<h1 class="text-2xl font-semibold text-secondary-text">time</h1>
+					<div class="flex flex-row gap-6 w-full">
+						<button
+							on:click={() => {
+								chooseTime(1 * 60000);
+							}}
+							class="bg-surface duration-200 {time == 1 * 60000
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							1:00
+						</button>
+						<button
+							on:click={() => {
+								chooseTime(5 * 60000);
+							}}
+							class="bg-surface duration-200 {time == 5 * 60000
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							5:00
+						</button>
+						<button
+							on:click={() => {
+								chooseTime(10 * 60000);
+							}}
+							class="bg-surface duration-200 {time == 10 * 60000
+								? 'selected'
+								: ''} h-12 w-full flex items-center justify-center flex-row rounded-lg"
+						>
+							10:00
+						</button>
+					</div>
 				</div>
 			</div>
 			<button
@@ -269,6 +318,38 @@
 		<div
 			class="relative w-full lg:h-full lg:w-5/11 flex flex-col justify-between px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
 		>
+			<button
+				on:click={createGame}
+				class="bottom-8 bg-surface h-12 px-6 py-4 rounded-lg flex flex-col justify-center items-center"
+				>create game</button
+			>
+		</div>
+	{/if}
+	{#if screen == 'send'}
+		<div
+			class="relative w-full lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
+		>
+			<div class="flex flex-col gap-8 w-full">
+				<h1 class="text-2xl font-semibold text-text w-full">invite others</h1>
+
+				<div class="flex flex-col gap-3 w-full">
+					<h1 class="text-2xl font-semibold text-secondary-text">game link</h1>
+					<input
+						spellcheck="false"
+						class="outline-0 bg-surface rounded-lg h-12 w-full p-4"
+						value={domain +
+							'/play?game=' +
+							gameId +
+							'&username=' +
+							Math.floor(Math.random() * 9999)}
+					/>
+				</div>
+
+				<div class="flex flex-col gap-3 w-full">
+					<h1 class="text-2xl font-semibold text-secondary-text">code</h1>
+					<input class="outline-0 bg-surface rounded-lg h-12 w-full p-4" value={gameId} />
+				</div>
+			</div>
 			<button
 				on:click={createGame}
 				class="bottom-8 bg-surface h-12 px-6 py-4 rounded-lg flex flex-col justify-center items-center"
