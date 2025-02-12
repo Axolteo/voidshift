@@ -31,8 +31,10 @@
 	let window: Window;
 	const urlParams = page.url.searchParams;
 	userId = urlParams.get('username')!;
-	if (userId == null) {
+	if (urlParams.get('username') == null) {
 		userId = Math.floor(Math.random() * 9999) + '';
+		page.url.searchParams.set('username', userId);
+		goto(`?${page.url.searchParams.toString()}`);
 	}
 	let gameId = urlParams.get('game');
 
