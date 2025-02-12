@@ -200,6 +200,10 @@
 	console.log(gameId);
 
 	function timerUpdate() {
+		if (game.white == null) {
+			gameReload++;
+			break;
+		}
 		if (gameInProgress) {
 			whiteTime = game.white.getTime();
 			blackTime = game.black.getTime();
