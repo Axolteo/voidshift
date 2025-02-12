@@ -33,7 +33,6 @@
 	userId = urlParams.get('username')!;
 	if (userId == null) {
 		userId = Math.floor(Math.random() * 9999) + '';
-
 	}
 	let gameId = urlParams.get('game');
 
@@ -212,7 +211,9 @@
 </script>
 
 <div class="w-full lg:h-full flex flex-col lg:flex-row gap-16">
-	<div class="relative h-full w-full flex-col items-center justify-normal flex gap-16">
+	<div
+		class="relative h-full w-full flex-col items-center justify-normal flex lg:justify-between lg:gap-0 gap-16"
+	>
 		<div class="w-full flex flex-row justify-between top-0 left-0">
 			<PlayerTimer time={whiteTime} username="white" hasTurn={currentTurn == 'white'}
 				><img src="anonymous.svg" alt="pfp" /></PlayerTimer
@@ -238,7 +239,11 @@
 		>
 			<div class="flex flex-col gap-8 w-full">
 				<h1 class="text-2xl font-semibold text-text w-full">create game</h1>
-
+				<button
+					on:click={createGame}
+					class="bottom-8 selected w-full h-12 px-6 py-4 rounded-lg flex flex-col justify-center items-center"
+					>play!</button
+				>
 				<div class="flex flex-col gap-3 w-full">
 					<h1 class="text-2xl font-semibold text-secondary-text">side</h1>
 					<div class="flex flex-row gap-6 w-full">
@@ -311,11 +316,6 @@
 					</div>
 				</div>
 			</div>
-			<button
-				on:click={createGame}
-				class="bottom-8 bg-surface h-12 px-6 py-4 rounded-lg flex flex-col justify-center items-center"
-				>create game</button
-			>
 		</div>
 	{/if}
 	{#if screen == 'game'}
