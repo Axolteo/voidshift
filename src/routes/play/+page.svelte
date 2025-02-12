@@ -202,9 +202,7 @@
 	function timerUpdate() {
 		if (game.white == null) {
 			gameReload++;
-			break;
-		}
-		if (gameInProgress) {
+		} else if (gameInProgress) {
 			whiteTime = game.white.getTime();
 			blackTime = game.black.getTime();
 			if (game.move.count() % 2 == 0) {
