@@ -86,7 +86,7 @@
 			players: {
 				white: white,
 				black: black,
-			}
+			},
 			lastMove: {
 				user: userId
 			}
