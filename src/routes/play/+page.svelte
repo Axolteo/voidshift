@@ -354,11 +354,6 @@
 					<input class="outline-0 bg-surface rounded-lg h-12 w-full p-4" value={gameId} />
 				</div>
 			</div>
-			<button
-				on:click={createGame}
-				class="bottom-8 bg-surface h-12 px-6 py-4 rounded-lg flex flex-col justify-center items-center"
-				>create game</button
-			>
 		</div>
 	{/if}
 </div>
