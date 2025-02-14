@@ -273,7 +273,7 @@
 	}
 </script>
 
-<div class="w-full lg:h-full flex flex-col items-center lg:items-start lg:flex-row gap-16">
+<div class="w-full lg:h-full flex flex-col items-center lg:items-start lg:flex-row gap-12">
 	<div
 		class="relative h-full w-full flex-col items-center justify-normal flex lg:justify-between lg:gap-0 gap-16"
 	>
