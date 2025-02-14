@@ -277,7 +277,7 @@
 	<div
 		class="relative h-full w-full flex-col items-center justify-normal flex lg:justify-between lg:gap-0 gap-16"
 	>
-		<div class="w-full flex flex-col justify-center md:flex-row gap-6 sm:gap-0 md:justify-between top-0 left-0">
+		<div class="w-full flex flex-col justify-center lg:flex-row gap-6 lg:gap-0 lg:justify-between top-0 left-0">
 			<PlayerTimer time={whiteTime} username={whitePlayer} hasTurn={currentTurn == 'white'}
 				><img src="anonymous.svg" alt="pfp" /></PlayerTimer
 			>
@@ -300,7 +300,7 @@
 	</div>
 	{#if $screen == 'create'}
 		<div
-			class="relative w-full max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
+			class="relative w-full min-w-114 max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface rounded-lg lg:overflow-y-scroll"
 		>
 			<div class="flex flex-col gap-8 w-full">
 				<h1 class="text-2xl font-semibold text-text w-full">create game</h1>
@@ -385,7 +385,7 @@
 	{/if}
 	{#if $screen == 'game'}
 		<div
-			class="relative w-full max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col bg-secondary-surface rounded-lg"
+			class="relative w-full min-w-114 max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col bg-secondary-surface rounded-lg"
 		>
 			<div
 				class="w-full backdrop-blur-3xl rounded-t-lg py-5 h-16 bg-transparent-surface flex flex-col justify-center items-center"
@@ -424,7 +424,7 @@
 	{/if}
 	{#if $screen == 'send'}
 		<div
-			class="relative w-full max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface lg:gap-0 rounded-lg lg:overflow-y-scroll"
+			class="relative w-full min-w-114 max-w-128 max-h-172 lg:h-full lg:w-5/11 flex flex-col justify-between flex-start px-8 py-12 gap-20 items-center bg-secondary-surface lg:gap-0 rounded-lg lg:overflow-y-scroll"
 		>
 			<div class="flex flex-col gap-8 w-full">
 				<h1 class="text-2xl font-semibold text-text w-full">invite others</h1>
