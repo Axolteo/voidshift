@@ -45,7 +45,7 @@
 			>
 		</div>
 	</div>
-	<div class="h-full w-full flex-col items-center justify-center hidden sm:flex pl">
+	<div class="h-full w-full flex-col items-center justify-center hidden md:flex pl">
 		<Game />
 	</div>
 </div>

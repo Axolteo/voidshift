@@ -67,6 +67,7 @@
 	let playerSide;
 	let gameState = 'play';
 	let movePositions;
+	let gameStatus = 'waiting';
 
 	// Get the center of a segment to place a piece
 	/**
@@ -147,7 +148,11 @@
 		if (gameState == 'end') {
 			return;
 		}
-		if (piece.side != turn.side || isOnline && (turn.side != playerSide && !fromCloud)) {
+		if (
+			piece.side != turn.side ||
+			(isOnline && turn.side != playerSide && !fromCloud) ||
+			(gameStatus != 'playing' && gameStatus != 'offline')
+		) {
 			return;
 		}
 		isSelected = true;
@@ -223,7 +228,8 @@
 				pieces[getPieceIndex(winPiece)].side = 'won';
 				console.log(pieces[getPieceIndex(winPiece)]);
 			});
-			gameState = 'end';
+			gameStatus = playerSide + ' win';
+			dispatch('winFound');
 		}
 		dispatch('moveMade');
 	}
@@ -330,13 +336,15 @@
 	let blackDeadline = Date.now() + blackTime;
 	if (isOnline) {
 		setInterval(() => {
-			let now = Date.now();
-			if (turn.side == 'white') {
-				whiteTime = whiteDeadline - Date.now();
-			} else {
-				blackTime = blackDeadline - Date.now();
+			if (gameStatus == 'playing') {
+				let now = Date.now();
+				if (turn.side == 'white') {
+					whiteTime = whiteDeadline - Date.now();
+				} else {
+					blackTime = blackDeadline - Date.now();
+				}
+				dispatch('timerUpdate');
 			}
-			dispatch('timerUpdate');
 		}, 100);
 	}
 	export const game = {
@@ -348,6 +356,12 @@
 		},
 		getState() {
 			return getGameState();
+		},
+		setStatus(status) {
+			gameStatus = status;
+		},
+		getStatus() {
+			return gameStatus;
 		},
 		setState(state) {
 			if (state == null) {
@@ -363,7 +377,7 @@
 						if (state[ringI][i] == -1) {
 							side = 'black';
 						} else if (state[ringI][i] == 2) {
-							side = "won";
+							side = 'won';
 						} else {
 							side = null;
 						}
@@ -417,6 +431,7 @@
 			},
 			setDeadline(deadline) {
 				whiteDeadline = deadline;
+				whiteTime = whiteDeadline - Date.now();
 			},
 			setTime(time) {
 				whiteTime = time;
@@ -433,12 +448,30 @@
 			},
 			setDeadline(deadline) {
 				blackDeadline = deadline;
+				blackTime = blackDeadline - Date.now();
 			},
 			setTime(time) {
 				blackTime = time;
 			}
 		},
 		move: {
+			setAll(moves) {
+				moveLog = moves;
+				if (moves == null) {
+					moveLog = [];
+				}
+			},
+			encode(move) {
+				if (move == null) {
+					return null;
+				}
+				return (
+					(move.from.segment + 9).toString(36).toLowerCase() +
+					move.from.ring +
+					(move.to.segment + 9).toString(36).toLowerCase() +
+					move.to.ring
+				);
+			},
 			run(moveId) {
 				let target = getPiece(moveId.from.ring, moveId.from.segment);
 				console.log('moving piece', target);
