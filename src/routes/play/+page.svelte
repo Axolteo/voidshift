@@ -277,7 +277,7 @@
 	<div
 		class="relative h-full w-full flex-col items-center justify-normal flex lg:justify-between lg:gap-0 gap-16"
 	>
-		<div class="w-full flex flex-row justify-between top-0 left-0">
+		<div class="w-full flex flex-col justify-center sm:flex-row gap-6 sm:gap-0 sm:justify-between top-0 left-0">
 			<PlayerTimer time={whiteTime} username={whitePlayer} hasTurn={currentTurn == 'white'}
 				><img src="anonymous.svg" alt="pfp" /></PlayerTimer
 			>
