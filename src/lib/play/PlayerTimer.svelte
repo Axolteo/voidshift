@@ -14,7 +14,7 @@
 	}
 </script>
 
-<div class="px-6 py-4 {hasTurn ? 'bg-ternary-surface' : 'bg-secondary-surface'} rounded-lg flex flex-row gap-6">
+<div class="px-6 py-4 {hasTurn ? 'bg-ternary-surface' : 'bg-secondary-surface'} rounded-lg flex flex-row justify-between">
 	<div class="flex flex-row gap-4">
 		<slot />
 		<p class="text-xl font-semibold text-text w-32 truncate">{username}</p>
